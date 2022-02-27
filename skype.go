@@ -15,6 +15,7 @@ type SkypeFileInfo struct {
 	devId    string
 	clientId string
 	time     string
+	filename string
 }
 
 // Parse a given directory
@@ -66,7 +67,7 @@ func parseDirSkype(path string) {
 	log.Println()
 	log.Println("Merging files...")
 
-	merged, statistics := mergeFiles(DBizedPath, 0)
+	merged, attaches, statistics := mergeFiles(DBizedPath, 0)
 
 	log.Println()
 	log.Println("Summarizing result...")
@@ -76,6 +77,7 @@ func parseDirSkype(path string) {
 		statistics[1],
 		statistics[2],
 		statistics[3],
+		attaches,
 		fail,
 	)
 
@@ -85,7 +87,7 @@ func parseDirSkype(path string) {
 	log.Println("=============================================================")
 }
 
-func summarizeSkypeProcess(path string, nks, devs, clients, files, fail int) {
+func summarizeSkypeProcess(path string, nks, devs, clients, files, attaches, fail int) {
 
 	file, openErr := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if openErr != nil {
@@ -100,19 +102,13 @@ func summarizeSkypeProcess(path string, nks, devs, clients, files, fail int) {
 	}()
 
 	file.WriteString(fmt.Sprintf(
-		"\n-- Skype log summary --\n\nTotal users (netkey): %v\nTotal skype accounts: %v\nTotal clients: %v\n\nTotal log files: %v\nFailed to process: %v\n",
-		nks, devs, clients, files, fail))
+		"\n-- Skype log summary --\n\nTotal users (netkey): %v\nTotal skype accounts: %v\nTotal clients: %v\nTotal attachments: %v\n\nTotal log files: %v\nFailed to process: %v\n",
+		nks, devs, clients, attaches, files, fail))
 }
 
 // Parse a given file
 func parseFileSkype(name string) bool {
 	log.Println("parsing:", name)
-
-	text, readErr := readTextFile(name)
-	if readErr != nil {
-		log.Print(readErr)
-		return false
-	}
 
 	info, nameErr := extractFileNameSkype(name)
 	if nameErr != nil {
@@ -127,31 +123,57 @@ func parseFileSkype(name string) bool {
 		return false
 	}
 
-	file, openErr := os.OpenFile(path.Join(destDirPath, info.time), os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-	if openErr != nil {
-		log.Print(openErr)
-		return false
-	}
-
-	defer func() {
-		if closeErr := file.Close(); closeErr != nil {
-			log.Println(closeErr)
+	if info.filename != "" {
+		// Moving attachment
+		moveError := os.Rename(name, path.Join(destDirPath, info.time+"__"+info.filename))
+		if moveError != nil {
+			log.Print(moveError)
+			return false
 		}
-	}()
+	} else {
+		text, readErr := readTextFile(name)
+		if readErr != nil {
+			log.Print(readErr)
+			return false
+		}
 
-	_, writeErr := file.WriteString(text)
-	if writeErr != nil {
-		log.Print(writeErr)
-		return false
+		// Moving txt file
+		SNS := " "
+		text = strings.ReplaceAll(text, SNS+SNS+":", SNS+PseudoName+SNS+":")
+		text = strings.ReplaceAll(text, SNS+info.devId+SNS+":", SNS+DevShortName+SNS+":")
+		text = strings.ReplaceAll(text, SNS+info.clientId+SNS+":", SNS+ClientShortName+SNS+":")
+
+		writeErr := writeTextFile(path.Join(destDirPath, info.time+".txt"), text)
+		if writeErr != nil {
+			log.Print(writeErr)
+		}
+
+		removeErr := os.Remove(name)
+		if removeErr != nil {
+			log.Print(removeErr)
+		}
 	}
 
 	return true
 }
 
 func extractFileNameSkype(name string) (*SkypeFileInfo, error) {
-	pieces := strings.Split(name, "_")
+
+	name = strings.ReplaceAll(name, SkypeNameSplitter+SkypeNameSplitter, SkypeNameSplitter+PseudoName+SkypeNameSplitter)
+
+	pieces := strings.Split(name, SkypeNameSplitter)
 	if len(pieces) != 6 {
 		return nil, fmt.Errorf("Invalid skype file name!")
 	}
-	return &SkypeFileInfo{pieces[0], pieces[3], pieces[4], pieces[5]}, nil
+
+	filename := ""
+	// Check if file
+	if len(pieces[5]) > 18 { // time + .txt = 18 length
+		filename = pieces[5][16:]
+		pieces[5] = pieces[5][:14]
+	} else {
+		// Remove .txt (extension) from time string
+		pieces[5] = pieces[5][:len(pieces[5])-4]
+	}
+	return &SkypeFileInfo{pieces[0], pieces[3], pieces[4], pieces[5], filename}, nil
 }
