@@ -10,3 +10,5 @@ var PseudoName = "?"
 var DevShortName = "DEV"
 var ClientShortName = "OPP"
 var AttachmentSign = "{<file>}"
+
+var ESIndexSkype = "skype-test01"

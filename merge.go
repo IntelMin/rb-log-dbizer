@@ -78,10 +78,13 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 	}
 
 	if mergedText != "" {
-		err := writeTextFile(filepath.Join(path, MergeFileName), mergedText)
+		mergePath := filepath.Join(path, MergeFileName)
+		err := writeTextFile(mergePath, mergedText)
 		if err != nil {
 			log.Print(err)
 		}
+
+		indexSkypeFile(&ESDocument{filepath.Join(currentDatePath, mergePath), mergedText})
 	}
 
 	return merged, attaches + len(attachments), statistics
