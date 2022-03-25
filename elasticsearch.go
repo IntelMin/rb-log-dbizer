@@ -82,7 +82,7 @@ func indexSkypeFile(document *ESDocument) {
 
 	// Set up the request object.
 	req := esapi.IndexRequest{
-		Index: ESIndexSkype,
+		Index: config.ESIndexSkype,
 		Body:  strings.NewReader(b.String()),
 	}
 

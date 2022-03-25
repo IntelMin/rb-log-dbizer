@@ -5,10 +5,11 @@ import "path/filepath"
 var currentDatePath string = ""
 
 func main() {
+	parseConfigFile()
 	initElasticSearch()
 
 	currentDatePath = produceDatePath(2022, 1, 8)
-	parseDirSkype(filepath.Join(BasePath, currentDatePath))
+	parseDirSkype(filepath.Join(config.BasePath, currentDatePath))
 
-	refreshIndex(ESIndexSkype)
+	refreshIndex(config.ESIndexSkype)
 }

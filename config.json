@@ -1,0 +1,12 @@
+{
+    "BasePath": "/home/osboxes/Documents/work/security/RB/skype",
+    "DBizedPath": "dbized",
+    "MergeFileName": "000-chat.txt",
+    "SummaryFileName": "summary.txt",
+    "SkypeNameSplitter": "  ",
+    "PseudoName": "?",
+    "DevShortName": "DEV",
+    "ClientShortName": "OPP",
+    "AttachmentSign": "{<file>}",
+    "ESIndexSkype": "skype-test02"
+}

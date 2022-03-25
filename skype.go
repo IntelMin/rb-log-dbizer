@@ -26,7 +26,7 @@ func parseDirSkype(path string) {
 	log.Println()
 
 	// Check if already processed
-	if isDirExist(filepath.Join(path, DBizedPath)) {
+	if isDirExist(filepath.Join(path, config.DBizedPath)) {
 		log.Println("This directory has already been processed. Remove the result directory and retry.")
 		log.Println()
 		log.Println("Processing <skype> rejected :", path)
@@ -67,12 +67,12 @@ func parseDirSkype(path string) {
 	log.Println()
 	log.Println("Merging files...")
 
-	merged, attaches, statistics := mergeFiles(DBizedPath, 0)
+	merged, attaches, statistics := mergeFiles(config.DBizedPath, 0)
 
 	log.Println()
 	log.Println("Summarizing result...")
 	summarizeSkypeProcess(
-		filepath.Join(path, DBizedPath, SummaryFileName),
+		filepath.Join(path, config.DBizedPath, config.SummaryFileName),
 		statistics[0],
 		statistics[1],
 		statistics[2],
@@ -116,7 +116,7 @@ func parseFileSkype(name string) bool {
 		return false
 	}
 
-	destDirPath := path.Join(DBizedPath, info.nk, info.devId, info.clientId)
+	destDirPath := path.Join(config.DBizedPath, info.nk, info.devId, info.clientId)
 	dirErr := os.MkdirAll(destDirPath, os.ModePerm)
 	if dirErr != nil {
 		log.Print(dirErr)
@@ -139,9 +139,9 @@ func parseFileSkype(name string) bool {
 
 		// Moving txt file
 		SNS := " "
-		text = strings.ReplaceAll(text, SNS+SNS+":", SNS+PseudoName+SNS+":")
-		text = strings.ReplaceAll(text, SNS+info.devId+SNS+":", SNS+DevShortName+SNS+":")
-		text = strings.ReplaceAll(text, SNS+info.clientId+SNS+":", SNS+ClientShortName+SNS+":")
+		text = strings.ReplaceAll(text, SNS+SNS+":", SNS+config.PseudoName+SNS+":")
+		text = strings.ReplaceAll(text, SNS+info.devId+SNS+":", SNS+config.DevShortName+SNS+":")
+		text = strings.ReplaceAll(text, SNS+info.clientId+SNS+":", SNS+config.ClientShortName+SNS+":")
 
 		writeErr := writeTextFile(path.Join(destDirPath, info.time+".txt"), text)
 		if writeErr != nil {
@@ -159,9 +159,9 @@ func parseFileSkype(name string) bool {
 
 func extractFileNameSkype(name string) (*SkypeFileInfo, error) {
 
-	name = strings.ReplaceAll(name, SkypeNameSplitter+SkypeNameSplitter, SkypeNameSplitter+PseudoName+SkypeNameSplitter)
+	name = strings.ReplaceAll(name, config.SkypeNameSplitter+config.SkypeNameSplitter, config.SkypeNameSplitter+config.PseudoName+config.SkypeNameSplitter)
 
-	pieces := strings.Split(name, SkypeNameSplitter)
+	pieces := strings.Split(name, config.SkypeNameSplitter)
 	if len(pieces) != 6 {
 		return nil, fmt.Errorf("Invalid skype file name!")
 	}

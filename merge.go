@@ -73,12 +73,12 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 
 	if mergedText != "" && len(attachments) > 0 {
 		for _, attachment := range attachments {
-			mergedText = strings.Replace(mergedText, attachment, AttachmentSign+attachment, 1)
+			mergedText = strings.Replace(mergedText, attachment, config.AttachmentSign+attachment, 1)
 		}
 	}
 
 	if mergedText != "" {
-		mergePath := filepath.Join(path, MergeFileName)
+		mergePath := filepath.Join(path, config.MergeFileName)
 		err := writeTextFile(mergePath, mergedText)
 		if err != nil {
 			log.Print(err)
