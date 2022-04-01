@@ -84,7 +84,9 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 			log.Print(err)
 		}
 
-		indexSkypeFile(&ESDocument{filepath.Join(currentDatePath, mergePath), mergedText})
+		if config.EnableElasticSearch == true {
+			indexSkypeFile(&ESDocument{filepath.Join(currentDatePath, mergePath), mergedText})
+		}
 	}
 
 	return merged, attaches + len(attachments), statistics

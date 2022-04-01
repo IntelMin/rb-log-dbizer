@@ -1,15 +1,25 @@
 package main
 
-import "path/filepath"
+import (
+	"log"
+	"path/filepath"
+)
 
 var currentDatePath string = ""
 
 func main() {
 	parseConfigFile()
-	initElasticSearch()
 
-	currentDatePath = produceDatePath(2022, 1, 8)
+	if config.EnableElasticSearch == true {
+		initElasticSearch()
+	} else {
+		log.Println("Skipping elastic search configuration...")
+	}
+
+	currentDatePath = produceDatePath(2022, 1, 1)
 	parseDirSkype(filepath.Join(config.BasePath, currentDatePath))
 
-	refreshIndex(config.ESIndexSkype)
+	if config.EnableElasticSearch == true {
+		refreshIndex(config.ESIndexSkype)
+	}
 }

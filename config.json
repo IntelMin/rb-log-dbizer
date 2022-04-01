@@ -8,5 +8,6 @@
     "DevShortName": "DEV",
     "ClientShortName": "OPP",
     "AttachmentSign": "{<file>}",
-    "ESIndexSkype": "skype-test02"
+    "ESIndexSkype": "skype-test02",
+    "EnableElasticSearch": false
 }
