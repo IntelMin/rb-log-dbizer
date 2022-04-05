@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-func mergeFiles(path string, depth int) (int, int, []int) {
+func mergeFilesSkype(path string, depth int) (int, int, []int) {
 
 	statistics := make([]int, 5)
 
@@ -33,7 +33,7 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 	for _, item := range items {
 		fullpath := filepath.Join(path, item.Name())
 		if item.IsDir() {
-			_merged, _attaches, _statistics := mergeFiles(fullpath, depth+1)
+			_merged, _attaches, _statistics := mergeFilesSkype(fullpath, depth+1)
 			merged += _merged
 			attaches += _attaches
 			for i, stat := range _statistics {
@@ -41,10 +41,16 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 			}
 		} else {
 
+			if item.Name() == config.MergeFileName ||
+				item.Name() == config.SummaryFileName ||
+				strings.HasPrefix(item.Name(), config.AttachmentPrefix) {
+				continue
+			}
+
 			// if attachment
 			if len(item.Name()) != 18 {
 				attachmentName := item.Name()[16:]
-				os.Rename(fullpath, filepath.Join(path, attachmentName))
+				os.Rename(fullpath, filepath.Join(path, config.AttachmentPrefix+attachmentName))
 				attachments = append(attachments, attachmentName)
 				continue
 			}
@@ -73,7 +79,7 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 
 	if mergedText != "" && len(attachments) > 0 {
 		for _, attachment := range attachments {
-			mergedText = strings.Replace(mergedText, attachment, config.AttachmentSign+attachment, 1)
+			mergedText = strings.Replace(mergedText, attachment, config.AttachmentSign+config.AttachmentPrefix+attachment, 1)
 		}
 	}
 
@@ -84,7 +90,7 @@ func mergeFiles(path string, depth int) (int, int, []int) {
 			log.Print(err)
 		}
 
-		if config.EnableElasticSearch == true {
+		if config.EnableElasticSearch {
 			indexSkypeFile(&ESDocument{filepath.Join(currentDatePath, mergePath), mergedText})
 		}
 	}

@@ -26,7 +26,7 @@ func parseDirSkype(path string) {
 	log.Println()
 
 	// Check if already processed
-	if isDirExist(filepath.Join(path, config.DBizedPath)) {
+	if config.CheckIfAlreadyProccessed && isDirExist(filepath.Join(path, config.DBizedPath)) {
 		log.Println("This directory has already been processed. Remove the result directory and retry.")
 		log.Println()
 		log.Println("Processing <skype> rejected :", path)
@@ -67,7 +67,7 @@ func parseDirSkype(path string) {
 	log.Println()
 	log.Println("Merging files...")
 
-	merged, attaches, statistics := mergeFiles(config.DBizedPath, 0)
+	merged, attaches, statistics := mergeFilesSkype(config.DBizedPath, 0)
 
 	log.Println()
 	log.Println("Summarizing result...")
@@ -116,7 +116,7 @@ func parseFileSkype(name string) bool {
 		return false
 	}
 
-	destDirPath := path.Join(config.DBizedPath, info.nk, info.devId, info.clientId)
+	destDirPath := path.Join(config.DBizedPath, info.nk, info.devId, strings.ReplaceAll(info.clientId, "...", "etc"))
 	dirErr := os.MkdirAll(destDirPath, os.ModePerm)
 	if dirErr != nil {
 		log.Print(dirErr)
@@ -159,11 +159,11 @@ func parseFileSkype(name string) bool {
 
 func extractFileNameSkype(name string) (*SkypeFileInfo, error) {
 
-	name = strings.ReplaceAll(name, config.SkypeNameSplitter+config.SkypeNameSplitter, config.SkypeNameSplitter+config.PseudoName+config.SkypeNameSplitter)
+	name = strings.ReplaceAll(name, config.LogFileNameSplitter+config.LogFileNameSplitter, config.LogFileNameSplitter+config.PseudoName+config.LogFileNameSplitter)
 
-	pieces := strings.Split(name, config.SkypeNameSplitter)
+	pieces := strings.Split(name, config.LogFileNameSplitter)
 	if len(pieces) != 6 {
-		return nil, fmt.Errorf("Invalid skype file name!")
+		return nil, fmt.Errorf("invalid skype file name")
 	}
 
 	filename := ""

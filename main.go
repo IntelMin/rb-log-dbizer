@@ -7,19 +7,29 @@ import (
 
 var currentDatePath string = ""
 
-func main() {
-	parseConfigFile()
+var targets = []string{"skype", "mail"}
 
-	if config.EnableElasticSearch == true {
+func main() {
+
+	args := parseArgs()
+
+	parseConfigFile(args.configPath)
+
+	if config.EnableElasticSearch {
 		initElasticSearch()
 	} else {
 		log.Println("Skipping elastic search configuration...")
 	}
 
-	currentDatePath = produceDatePath(2022, 1, 1)
-	parseDirSkype(filepath.Join(config.BasePath, currentDatePath))
+	currentDatePath = args.dateStr
 
-	if config.EnableElasticSearch == true {
+	if args.target == "skype" {
+		parseDirSkype(filepath.Join(config.BasePath, "skype", currentDatePath))
+	} else if args.target == "mail" {
+		parseDirMail(filepath.Join(config.BasePath, "mail", currentDatePath))
+	}
+
+	if config.EnableElasticSearch {
 		refreshIndex(config.ESIndexSkype)
 	}
 }

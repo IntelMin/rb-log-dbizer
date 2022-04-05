@@ -8,28 +8,30 @@ import (
 )
 
 type Config struct {
-	BasePath            string `json:"BasePath"`
-	DBizedPath          string `json:"DBizedPath"`
-	MergeFileName       string `json:"MergeFileName"`
-	SummaryFileName     string `json:"SummaryFileName"`
-	SkypeNameSplitter   string `json:"SkypeNameSplitter"`
-	PseudoName          string `json:"PseudoName"`
-	DevShortName        string `json:"DevShortName"`
-	ClientShortName     string `json:"ClientShortName"`
-	AttachmentSign      string `json:"AttachmentSign"`
-	ESIndexSkype        string `json:"ESIndexSkype"`
-	EnableElasticSearch bool   `json:"EnableElasticSearch"`
+	BasePath                 string `json:"BasePath"`
+	DBizedPath               string `json:"DBizedPath"`
+	CheckIfAlreadyProccessed bool   `json:"CheckIfAlreadyProccessed"`
+	MergeFileName            string `json:"MergeFileName"`
+	SummaryFileName          string `json:"SummaryFileName"`
+	LogFileNameSplitter      string `json:"LogFileNameSplitter"`
+	AttachmentPrefix         string `json:"AttachmentPrefix"`
+	PseudoName               string `json:"PseudoName"`
+	DevShortName             string `json:"DevShortName"`
+	ClientShortName          string `json:"ClientShortName"`
+	AttachmentSign           string `json:"AttachmentSign"`
+	ESIndexSkype             string `json:"ESIndexSkype"`
+	EnableElasticSearch      bool   `json:"EnableElasticSearch"`
 }
 
 var config Config
 
-func parseConfigFile() {
+func parseConfigFile(configFilePath string) {
 	log.Println("Getting configs...")
-	jsonFile, err := os.Open("config.json")
+	jsonFile, err := os.Open(configFilePath)
 
 	if err != nil {
 		log.Println("Error while opening config file")
-		return
+		os.Exit(2)
 	}
 
 	defer jsonFile.Close()
