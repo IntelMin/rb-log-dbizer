@@ -67,7 +67,7 @@ func refreshIndex(index string) {
 	}
 }
 
-func indexSkypeFile(document *ESDocument) {
+func indexFile(document *ESDocument, index string) {
 
 	filteredText := strings.ReplaceAll(document.text, "\n", "<br>")
 	filteredText = strings.ReplaceAll(filteredText, "\"", "'")
@@ -82,7 +82,7 @@ func indexSkypeFile(document *ESDocument) {
 
 	// Set up the request object.
 	req := esapi.IndexRequest{
-		Index: config.ESIndexSkype,
+		Index: index,
 		Body:  strings.NewReader(b.String()),
 	}
 

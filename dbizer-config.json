@@ -11,5 +11,6 @@
     "ClientShortName": "OPP",
     "AttachmentSign": "{<file>}",
     "ESIndexSkype": "skype-test02",
+    "ESIndexMail": "mail-test02",
     "EnableElasticSearch": false
 }

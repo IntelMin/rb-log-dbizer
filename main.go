@@ -25,11 +25,14 @@ func main() {
 
 	if args.target == "skype" {
 		parseDirSkype(filepath.Join(config.BasePath, "skype", currentDatePath))
+		if config.EnableElasticSearch {
+			refreshIndex(config.ESIndexSkype)
+		}
 	} else if args.target == "mail" {
 		parseDirMail(filepath.Join(config.BasePath, "mail", currentDatePath))
+		if config.EnableElasticSearch {
+			refreshIndex(config.ESIndexMail)
+		}
 	}
 
-	if config.EnableElasticSearch {
-		refreshIndex(config.ESIndexSkype)
-	}
 }

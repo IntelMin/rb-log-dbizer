@@ -20,6 +20,7 @@ type Config struct {
 	ClientShortName          string `json:"ClientShortName"`
 	AttachmentSign           string `json:"AttachmentSign"`
 	ESIndexSkype             string `json:"ESIndexSkype"`
+	ESIndexMail              string `json:"ESIndexMail"`
 	EnableElasticSearch      bool   `json:"EnableElasticSearch"`
 }
 

@@ -122,9 +122,21 @@ func parseFileMail(name string) bool {
 		return false
 	}
 
-	moveErr := os.Rename(name, path.Join(destDirPath, info.time+".eml"))
+	text, readErr := readTextFile(name)
+	if readErr != nil {
+		log.Print(readErr)
+		return false
+	}
+
+	destFilePath := path.Join(destDirPath, info.time+".eml")
+
+	moveErr := os.Rename(name, destFilePath)
 	if moveErr != nil {
 		log.Print(moveErr)
+	}
+
+	if config.EnableElasticSearch {
+		indexFile(&ESDocument{filepath.Join(currentDatePath, destFilePath), text}, config.ESIndexMail)
 	}
 
 	return true
