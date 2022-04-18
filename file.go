@@ -38,6 +38,27 @@ func readTextFile(path string) (string, error) {
 	return string(content[:]), nil
 }
 
+func readBytesFile(path string) ([]byte, error) {
+
+	file, err := os.Open(path)
+	if err != nil {
+		return nil, err
+	}
+
+	defer func() {
+		if err = file.Close(); err != nil {
+			log.Println(err)
+		}
+	}()
+
+	content, err := ioutil.ReadAll(file)
+	if err != nil {
+		return nil, err
+	}
+
+	return content, nil
+}
+
 func writeTextFile(path string, text string) error {
 	file, openErr := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
 	if openErr != nil {

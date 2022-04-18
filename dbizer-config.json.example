@@ -1,5 +1,5 @@
 {
-    "BasePath": "/home/osboxes/Documents/work/security/RB",
+    "BasePath": "<PATH/TO/LOG/DIRECTORY>",
     "DBizedPath": "dbized",
     "CheckIfAlreadyProccessed": false,
     "MergeFileName": "000-chat.txt",
@@ -10,7 +10,7 @@
     "DevShortName": "DEV",
     "ClientShortName": "OPP",
     "AttachmentSign": "{<file>}",
-    "ESIndexSkype": "skype-test02",
-    "ESIndexMail": "mail-test04",
+    "ESIndexSkype": "skype01",
+    "ESIndexMail": "mail01",
     "EnableElasticSearch": true
 }

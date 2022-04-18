@@ -8,6 +8,9 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+
+	"github.com/DusanKasan/parsemail"
+	"github.com/k3a/html2text"
 )
 
 type MailFileInfo struct {
@@ -66,44 +69,14 @@ func parseDirMail(path string) {
 	log.Println()
 	log.Println("Merging files...")
 
-	// merged, attaches, statistics := mergeFilesMail(config.DBizedPath, 0)
-
 	log.Println()
 	log.Println("Summarizing result...")
-	// summarizeMailProcess(
-	// 	filepath.Join(path, config.DBizedPath, config.SummaryFileName),
-	// 	statistics[0],
-	// 	statistics[1],
-	// 	statistics[2],
-	// 	statistics[3],
-	// 	attaches,
-	// 	fail,
-	// )
 
 	log.Println()
 	log.Println("Processing <mail> completed :", path)
 	log.Printf("Parsed %v file(s), Failed %v file(s)", success, fail)
 	log.Println("=============================================================")
 }
-
-// func summarizeMailProcess(path string, nks, devs, clients, files, attaches, fail int) {
-
-// 	file, openErr := os.OpenFile(path, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
-// 	if openErr != nil {
-// 		log.Print(openErr)
-// 		return
-// 	}
-
-// 	defer func() {
-// 		if closeErr := file.Close(); closeErr != nil {
-// 			log.Println(closeErr)
-// 		}
-// 	}()
-
-// 	file.WriteString(fmt.Sprintf(
-// 		"\n-- Mail log summary --\n\nTotal users (netkey): %v\nTotal mail accounts: %v\nTotal clients: %v\nTotal attachments: %v\n\nTotal log files: %v\nFailed to process: %v\n",
-// 		nks, devs, clients, attaches, files, fail))
-// }
 
 // Parse a given file
 func parseFileMail(name string) bool {
@@ -122,21 +95,32 @@ func parseFileMail(name string) bool {
 		return false
 	}
 
-	text, readErr := readTextFile(name)
-	if readErr != nil {
-		log.Print(readErr)
-		return false
-	}
-
 	destFilePath := path.Join(destDirPath, info.time+".eml")
+
+	if config.EnableElasticSearch {
+		mailContent, readErr := readTextFile(name)
+		if readErr != nil {
+			log.Print(readErr)
+			return false
+		}
+		e, err := parsemail.Parse(strings.NewReader(mailContent))
+		if err != nil {
+			log.Print(err)
+			return false
+		}
+
+		textBody := html2text.HTML2Text(e.HTMLBody)
+
+		res := indexFile(&ESDocument{filepath.Join(currentDatePath, destFilePath), textBody}, config.ESIndexMail)
+
+		if !res {
+			return false
+		}
+	}
 
 	moveErr := os.Rename(name, destFilePath)
 	if moveErr != nil {
 		log.Print(moveErr)
-	}
-
-	if config.EnableElasticSearch {
-		indexFile(&ESDocument{filepath.Join(currentDatePath, destFilePath), text}, config.ESIndexMail)
 	}
 
 	return true

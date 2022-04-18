@@ -4,7 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/elastic/go-elasticsearch/esapi"
 	"github.com/elastic/go-elasticsearch/v7"
@@ -67,9 +70,10 @@ func refreshIndex(index string) {
 	}
 }
 
-func indexFile(document *ESDocument, index string) {
+func indexFile(document *ESDocument, index string) bool {
 
-	filteredText := strings.ReplaceAll(document.text, "\n", "<br>")
+	re := regexp.MustCompile(`\r?\n`)
+	filteredText := re.ReplaceAllString(document.text, " ")
 	filteredText = strings.ReplaceAll(filteredText, "\"", "'")
 	// Build the request body.
 	var b strings.Builder
@@ -78,7 +82,18 @@ func indexFile(document *ESDocument, index string) {
 	b.WriteString(`",`)
 	b.WriteString(`"text" : "`)
 	b.WriteString(filteredText)
+	b.WriteString(`",`)
+	b.WriteString(`"timestamp" : "`)
+	b.WriteString(strconv.FormatInt(time.Now().Unix(), 10))
 	b.WriteString(`"}`)
+
+	// log.Println("=================================================================================")
+	// log.Print(document.text)
+	// log.Println("--------------------------------------")
+	// log.Print(filteredText)
+	// log.Println("--------------------------------------")
+	// log.Print(b.String())
+	// log.Println("======================================")
 
 	// Set up the request object.
 	req := esapi.IndexRequest{
@@ -90,11 +105,14 @@ func indexFile(document *ESDocument, index string) {
 	res, err := req.Do(context.Background(), es)
 	if err != nil {
 		log.Fatalf("Error getting response: %s", err)
+		return false
 	}
 	defer res.Body.Close()
 
 	if res.IsError() {
 		log.Printf("[%s] Error indexing document in path: %s", res.Status(), document.path)
+		return false
 	}
 
+	return true
 }
